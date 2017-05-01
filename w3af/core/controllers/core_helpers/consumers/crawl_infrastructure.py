@@ -76,6 +76,7 @@ class crawl_infrastructure(BaseConsumer):
 
             try:
                 work_unit = self.in_queue.get(timeout=0.1)
+                print 'crawl_infr-work_unit *********' + str(work_unit)
             except KeyboardInterrupt:
                 # https://github.com/andresriancho/w3af/issues/9587
                 #
@@ -87,6 +88,7 @@ class crawl_infrastructure(BaseConsumer):
             except Queue.Empty:
                 # pylint: disable=E1120
                 try:
+                    print '************input queue empty***************'
                     self._route_all_plugin_results()
                 except KeyboardInterrupt:
                     continue
@@ -141,8 +143,9 @@ class crawl_infrastructure(BaseConsumer):
 
     @task_decorator
     def _consume(self, function_id, work_unit):
+        # self._consumer_plugins init the crawl_infra's param comment by Lightning
         for plugin in self._consumer_plugins:
-
+            print 'crawl_infra _comsume plugin *********' + str(plugin)
             if not self._running:
                 return
 
@@ -151,12 +154,15 @@ class crawl_infrastructure(BaseConsumer):
 
             om.out.debug('%s plugin is testing: "%s"' % (plugin.get_name(),
                                                          work_unit))
-
+            # start the disk monitor
             self._run_observers(work_unit)
 
             # TODO: unittest what happens if an exception (which is not handled
             #       by the exception handler) is raised. Who's doing a .get()
             #       on those ApplyResults generated here?
+            # run crawl and infrastructure plugins.
+            # callback the self._plugin_finished_cb after self._discover_worker
+            # done .comment by Lightning
             self._threadpool.apply_async(return_args(self._discover_worker),
                                         (plugin, work_unit,),
                                          callback=self._plugin_finished_cb)
@@ -170,6 +176,10 @@ class crawl_infrastructure(BaseConsumer):
         :return: None
         """
         try:
+            # _observers had be added DiskSpaceObserver to
+            # Monitor free disk space and raise an exception if it's too low
+            # see the disk_space_observer.py
+            # comment by Lightning
             for observer in self._observers:
                 observer.crawl(fuzzable_request)
         except Exception, e:
@@ -442,6 +452,7 @@ class crawl_infrastructure(BaseConsumer):
         :return: A list with the newly found fuzzable requests.
         """
         args = (plugin.get_name(), fuzzable_request.get_uri())
+        print 'crawl_infra _discover_worker **************' + str(args)
         om.out.debug('Called _discover_worker(%s,%s)' % args)
 
         # Status reporting
@@ -452,7 +463,9 @@ class crawl_infrastructure(BaseConsumer):
                                              fuzzable_request.get_uri()))
 
         try:
+            # use plugins' discover_wrapper function to find result .comment by Lightning
             result = plugin.discover_wrapper(fuzzable_request)
+            print 'crawl_infra _discover_worker result ********' + str(result)
         except BaseFrameworkException, e:
             msg = 'An exception was found while running "%s" with "%s": "%s".'
             om.out.error(msg % (plugin.get_name(), fuzzable_request), e)

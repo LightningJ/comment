@@ -103,8 +103,10 @@ class CoreStrategy(object):
             self._setup_observers()
             self._setup_404_detection()
 
+            # This will start the whole discovery process .comment by Lightning
             self._seed_discovery()
-
+            # it will take things from the discovery Queue and store them in one
+            # or more Queues (audit, bruteforce,etc).comment by Lightning
             self._fuzzable_request_router()
 
         except Exception, e:
@@ -617,7 +619,7 @@ class CoreStrategy(object):
         om.out.debug('Called _setup_audit()')
 
         audit_plugins = self._w3af_core.plugins.plugins['audit']
-
+        print 'strategy _setup_audit audit_plugins *******' + str(audit_plugins)
         if audit_plugins:
             self._audit_consumer = audit(audit_plugins, self._w3af_core)
             self._audit_consumer.start()

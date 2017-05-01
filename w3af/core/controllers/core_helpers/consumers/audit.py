@@ -59,7 +59,9 @@ class audit(BaseConsumer):
     def get_original_response(self, fuzzable_request):
         plugin = self._consumer_plugins[0]
         return plugin.get_original_response(fuzzable_request)
-        
+
+    # call the parents class run and call _consume_wrapper function
+    # and call the self._consume(work_unit) funtion .comment by Lightning
     def _consume(self, fuzzable_request):
         """
         Consume a fuzzable_request that was found by the crawl/infrastructure

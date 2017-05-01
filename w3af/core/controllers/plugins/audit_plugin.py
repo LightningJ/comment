@@ -135,6 +135,7 @@ class AuditPlugin(Plugin):
         fuzzable_request = safe_deepcopy(fuzzable_request)
 
         try:
+            # call the child plugin audit function
             return self.audit(fuzzable_request, orig_resp)
         except FourOhFourDetectionException, ffde:
             # We simply ignore any exceptions we find during the 404 detection
